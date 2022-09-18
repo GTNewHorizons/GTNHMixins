@@ -1,0 +1,35 @@
+[
+  {
+    "modid": "${modId}",
+    "name": "GTNHMixins",
+    "description": "GTNH flavored mixins",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/GTNewHorizons/gtnhmixins",
+    "updateUrl": "",
+    "authorList": [
+      "mitchej123"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  },
+  {
+    "modid": "spongemixins",
+    "name": "SpongeMixins Loader",
+    "description": "Spongemixins stub",
+    "version": "1.5.0",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "Time_Conqueror", "mitchej123"
+    ],
+    "credits": "SpongePowered Team",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [],
+    "parent": "${modId}"
+  }
+]

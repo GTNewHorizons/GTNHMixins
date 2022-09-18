@@ -1,0 +1,11 @@
+# Project exclude paths
+/.gradle/
+/out/
+build/
+.idea
+eclipse
+*.bat
+*.iml
+*.ipr
+*.iws
+hs_err_*.log

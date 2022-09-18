@@ -1,0 +1,257 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name 'forge'
+            url 'https://maven.minecraftforge.net'
+        }
+        maven {
+            // GTNH ForgeGradle Fork
+            name = "GTNH Maven"
+            url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+        }
+        maven {
+            name 'sonatype'
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2.9'
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'org.ajoberstar.grgit' version '4.1.1'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
+}
+apply plugin: 'forge'
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+version = "2.0.0"
+group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "gtnhmixins"
+
+configurations {
+    repackMixin
+    repackMixinProcessor
+    annotationProcessor
+    sources {
+        transitive = false
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+ext {
+    mixinVersion = '0.8.3-GTNH'
+    asmVersion = '7.2'
+
+    mixinSrg = new File(buildDir, "mixins/mixins.gtnhmixins.srg")
+    mixinRefMapName = "mixins.gtnhmixins.refmap.json"
+    mixinRefMap = new File(buildDir, "mixins/" + mixinRefMapName)
+}
+
+minecraft {
+    version = "1.7.10-10.13.4.1614-1.7.10"
+    runDir = "run"
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        // GTNH ForgeGradle Fork
+        name = "GTNH Maven"
+        url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+    }
+    maven {
+        name 'Overmind forge repo mirror'
+        url 'https://gregtech.overminddl1.com/'
+    }
+    flatDir {
+        dirs 'dependencies'
+    }
+}
+
+dependencies {
+    repackMixin("org.spongepowered:mixin:$mixinVersion")
+    repackMixin("org.ow2.asm:asm-tree:$asmVersion")
+    repackMixin("org.ow2.asm:asm-commons:$asmVersion")
+    repackMixin("org.ow2.asm:asm-util:$asmVersion")
+    repackMixin("com.google.guava:guava:21.0")
+
+    repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+
+    implementation name: "mixin-$mixinVersion-repack"
+    annotationProcessor name: "mixin-$mixinVersion-processor-repack"
+}
+
+reobf {
+    if (mixinSrg.exists()) {
+        addExtraSrgFile mixinSrg
+    }
+}
+
+task copySrgs(type: Copy, dependsOn: 'genSrgs') {
+    from plugins.getPlugin("forge").delayedFile('{SRG_DIR}')
+    include '**/*.srg'
+    into 'build/srgs'
+}
+
+// Execute for generate mixin repack jar
+task repackMixinJar(type: ShadowJar) {
+    destinationDirectory.set(layout.projectDirectory.dir('dependencies'))
+    archiveFileName.set("mixin-$mixinVersion-repack.jar")
+    configurations = [project.configurations.repackMixin]
+
+    mergeServiceFiles()
+
+    exclude 'META-INF/MANIFEST.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
+    exclude '**/module-info.class'
+
+    relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
+    relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
+}
+
+// Execute for generate mixin annotation processor repack jar
+task repackMixinProcessorJar(type: ShadowJar) {
+    destinationDirectory.set(layout.projectDirectory.dir('dependencies'))
+    archiveFileName.set("mixin-$mixinVersion-processor-repack.jar")
+    configurations = [project.configurations.repackMixinProcessor]
+
+    mergeServiceFiles()
+
+    exclude 'META-INF/MANIFEST.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
+    exclude '**/module-info.class'
+
+    relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
+    relocate 'com.google.gson', 'org.spongepowered.libraries.com.google.gson'
+    relocate 'org.apache.logging.log4j', 'org.spongepowered.libraries.org.apache.logging.log4j'
+    relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
+}
+
+compileJava {
+    dependsOn copySrgs
+    options.compilerArgs += [
+            '-Xlint:-processing',
+            "-AoutSrgFile=${mixinSrg.canonicalPath}",
+            "-AoutRefMapFile=${mixinRefMap.canonicalPath}",
+            "-AreobfSrgFile=${file('build/srgs/mcp-srg.srg').canonicalPath}"
+    ]
+    options.encoding = 'UTF-8'
+}
+
+
+jar {
+    manifest {
+        attributes([
+                "TweakClass"                 : "org.spongepowered.asm.launch.MixinTweaker",
+                'FMLCorePluginContainsFMLMod': 'true',
+                "FMLCorePlugin"              : "com.gtnewhorizon.gtnhmixins.core.GTNHMixinsCore",
+                "MixinConfigs"               : "mixins.gtnhmixins.json",
+                "TweakOrder"                 : -2147483648,
+                "ForceLoadAsMod"             : true
+        ])
+    }
+
+    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-repack.jar"))) {
+        exclude "META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.MF"
+        exclude "META-INF/services/*.Processor"
+        // Replaced by local classes
+        exclude "org/spongepowered/asm/bridge/**"
+    }
+}
+
+task annotationProcessorJar(type: Jar, dependsOn: classes) {
+    classifier = 'processor'
+    from(sourceSets.main.output) {
+//        include 'io/github/tox1cozz/mixinextras/**'
+        include 'META-INF/services/javax.annotation.processing.Processor'
+    }
+    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-processor-repack.jar"))) {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/services/*.Processor'
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+    from(configurations.sources.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/services/*.Processor'
+        // Replaced by custom classes
+        exclude 'org/spongepowered/asm/bridge/**'
+    }
+}
+
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    inputs.property "modId", project.modId
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version, 'modId': project.modId
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+
+    classifier = 'dev'
+}
+
+artifacts {
+    archives annotationProcessorJar
+    archives sourcesJar
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            version = project.version
+            artifactId = project.archivesBaseName
+
+            artifact(jar) {
+                builtBy jar
+            }
+            artifact(annotationProcessorJar) {
+                builtBy annotationProcessorJar
+            }
+            artifact(sourcesJar) {
+                builtBy sourcesJar
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = "http://jenkins.usrv.eu:8081/nexus/content/repositories/releases"
+            credentials {
+                username = System.getenv("MAVEN_USER") ?: "NONE"
+                password = System.getenv("MAVEN_PASSWORD") ?: "NONE"
+            }
+        }
+    }
+}
