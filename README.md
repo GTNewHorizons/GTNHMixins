@@ -38,3 +38,9 @@ Inspired by [SpongeMixins](https://github.com/GTNewHorizons/SpongeMixins) by Tim
 ### _Mixin Booter Legacy_
 
 Inspiration and code adapated from https://github.com/tox1cozZ/mixin-booter-legacy under the [LGPL-2.0 License](https://github.com/tox1cozZ/mixin-booter-legacy/blob/master/LICENSE)
+
+### Credits
+
+Inspiration and skeleton code for the backwards compat with SpongeMixins (MinecraftURLClassPath) derived from [Falsepattern](https://github.com/FalsePattern/) under either the Fair Use Doctrine,  MIT License, or LGPL license. 
+
+mitchej123 for adding the [original MinecraftURLClassPath](https://github.com/GTNewHorizons/SpongeMixins/commit/a8f81842ea7d7cf131191ea41ba58c3cb05b9a3c)!
