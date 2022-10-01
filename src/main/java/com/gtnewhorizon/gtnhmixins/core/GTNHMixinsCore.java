@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.transformer.Config;
 import sun.misc.URLClassPath;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -77,6 +76,12 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
 
     private Set<String> getLoadedCoremods(List<?> coremodList) {
         final Set<String> loadedCoremods = new HashSet<>();
+
+        try {
+            // Manual Optifine identification 
+            Class.forName("optifine.OptiFineForgeTweaker");
+            loadedCoremods.add("optifine.OptiFineForgeTweaker");
+        } catch (ClassNotFoundException ignored) {}
         
         // Grab a list of tweakers (fastcraft)
         for (Object tweak : (ArrayList<?>)Launch.blackboard.get("Tweaks")) {
@@ -102,7 +107,7 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
         final Object coremodList = data.get("coremodList");
         
         if (coremodList instanceof List) {
-            final Set<String> loadedCoremods =getLoadedCoremods((List<?>) coremodList);
+            final Set<String> loadedCoremods = getLoadedCoremods((List<?>) coremodList);
 
             LOGGER.info("LoadedCoreMods {}", loadedCoremods.toString());
             for (Object coremod : (List<?>)coremodList) {
