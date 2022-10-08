@@ -1,7 +1,7 @@
 # GTNH Mixins
 Library that provides mixin functionality
-* Includes a shadowed Sponge Powered Mixins fork - Currently 0.8.3-GTNH
-* Shades the required libraries that previously made 0.8.3 challenging to use with MC 1.7.10
+* Includes a shadowed Sponge Powered Mixins fork - Currently 0.8.5-GTNH
+* Shades the required libraries that previously made 0.8.5 challenging to use with MC 1.7.10
 * Adds two additional loading strategies for mixins, inspired by [Mixin Booter Legacy](https://github.com/tox1cozZ/mixin-booter-legacy)
   * [IEarlyMixinLoader](src/main/java/com/gtnewhorizon/gtnhmixins/IEarlyMixinLoader.java) - For Mixins targetting Minecraft, Forge, and CoreMods
   * [ILateMixinLoader](src/main/java/com/gtnewhorizon/gtnhmixins/ILateMixinLoader.java) & [@LateMixin](src/main/java/com/gtnewhorizon/gtnhmixins/LateMixin.java) - For mixins that target other (non core) mods.  Requires both the interface and the Annotation due to limitations in the 1.7.10 ASMDataTable
