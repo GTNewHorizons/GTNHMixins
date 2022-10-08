@@ -2,6 +2,7 @@ package com.gtnewhorizon.gtnhmixins;
 
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.Config;
+import org.spongepowered.asm.mixin.transformer.ext.Extensions;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,7 +10,7 @@ import java.lang.reflect.Method;
 public class Reflection {
     /* Reflection Fun */
     public static final Class<?> pluginWrapperClass, mixinsClass, configClass, mixinConfigClass, mixinTransformerClass, mixinProcessorClass;
-    public static final Field coreModInstanceField, configField, mixinClassesField, processorField;
+    public static final Field coreModInstanceField, configField, mixinClassesField, processorField, extensionsField;
     public static final Method registerConfigurationMethod, selectConfigsMethod, prepareConfigsMethod;
     
     static {
@@ -37,8 +38,11 @@ public class Reflection {
             selectConfigsMethod = mixinProcessorClass.getDeclaredMethod("selectConfigs", MixinEnvironment.class);
             selectConfigsMethod.setAccessible(true);
 
-            prepareConfigsMethod = mixinProcessorClass.getDeclaredMethod("prepareConfigs", MixinEnvironment.class);
+            prepareConfigsMethod = mixinProcessorClass.getDeclaredMethod("prepareConfigs", MixinEnvironment.class, Extensions.class);
             prepareConfigsMethod.setAccessible(true);
+
+            extensionsField = mixinProcessorClass.getDeclaredField("extensions");
+            extensionsField.setAccessible(true);
 
             /* Config */
             configClass = Class.forName("org.spongepowered.asm.mixin.transformer.Config");
