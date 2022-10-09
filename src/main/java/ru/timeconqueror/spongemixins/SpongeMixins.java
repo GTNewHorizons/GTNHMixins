@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
  * This is here for SpongeMixins backwards compat
  */
 @SuppressWarnings("unused")
-@Mod(modid = SpongeMixins.MODID, version = "2.0.0", name = SpongeMixins.NAME, acceptableRemoteVersions = "*")
+@Mod(modid = SpongeMixins.MODID, version = "2.0.1", name = SpongeMixins.NAME, acceptableRemoteVersions = "*")
 public class SpongeMixins {
     public static final String NAME = "SpongeMixins Loader";
     public static final String MODID = "spongemixins";

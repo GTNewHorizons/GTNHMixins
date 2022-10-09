@@ -1,5 +1,6 @@
 package com.gtnewhorizon.gtnhmixins.core;
 
+import com.google.common.collect.ImmutableMap;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import com.gtnewhorizon.gtnhmixins.Reflection;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
@@ -27,6 +28,15 @@ import java.util.Set;
 public class GTNHMixinsCore implements IFMLLoadingPlugin {
     public static final String PLUGIN_NAME = "GTNHMixins Core Plugin";
     public static final Logger LOGGER = LogManager.getLogger(PLUGIN_NAME);
+
+    /**
+     * Core mods we need to Manually look for:
+     *    (classNameToFind, coreModNameToUse)
+     */
+    public static final Map<String, String> MANUALLY_IDENTIFIED_COREMODS = ImmutableMap.<String, String>builder()
+        .put("optifine.OptiFineForgeTweaker", "optifine.OptiFineForgeTweaker")
+        .put("org.bukkit.World", "Bukkit")
+        .build();
 
     static {
         LOGGER.info("Initializing GTNHMixins Core");
@@ -76,12 +86,15 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
 
     private Set<String> getLoadedCoremods(List<?> coremodList) {
         final Set<String> loadedCoremods = new HashSet<>();
+        
+        // Manual "Coremod" identification.  Be sure you're not loading classes too early   
+        MANUALLY_IDENTIFIED_COREMODS.forEach((clsName, coreModIdentifier) -> {
+            try {
+                Class.forName(clsName);
+                loadedCoremods.add(coreModIdentifier);
+            } catch (ClassNotFoundException ignored) {}            
+        });
 
-        try {
-            // Manual Optifine identification 
-            Class.forName("optifine.OptiFineForgeTweaker");
-            loadedCoremods.add("optifine.OptiFineForgeTweaker");
-        } catch (ClassNotFoundException ignored) {}
         
         // Grab a list of tweakers (fastcraft)
         for (Object tweak : (ArrayList<?>)Launch.blackboard.get("Tweaks")) {
