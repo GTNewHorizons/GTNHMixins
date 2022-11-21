@@ -15,18 +15,36 @@
 
 package ru.timeconqueror.spongemixins;
 
+import com.gtnewhorizon.gtnhmixins.GTNHMixins;
 import cpw.mods.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * This is here for SpongeMixins backwards compat
+ * @deprecated use {@link GTNHMixins} instead
  */
 @SuppressWarnings("unused")
+@Deprecated
 @Mod(modid = SpongeMixins.MODID, version = "2.0.1", name = SpongeMixins.NAME, acceptableRemoteVersions = "*")
 public class SpongeMixins {
+    
+    /**
+     * @deprecated use {@link GTNHMixins#NAME} instead
+     */
+    @Deprecated
     public static final String NAME = "SpongeMixins Loader";
+    
+    /**
+     * @deprecated use {@link GTNHMixins#MODID} instead
+     */
+    @Deprecated
     public static final String MODID = "spongemixins";
-    public static final Logger LOGGER = LogManager.getLogger(NAME);
+    
+    /**
+     * @deprecated use {@link GTNHMixins#LOGGER} instead
+     */
+    @Deprecated
+    public static final Logger LOGGER = GTNHMixins.LOGGER;
 
 }
