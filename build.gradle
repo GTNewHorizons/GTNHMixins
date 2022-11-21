@@ -34,17 +34,22 @@ apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.0.2"
+version = "2.0.3"
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
 configurations {
     repackMixin
+    repackMixinSources
     repackMixinProcessor
     annotationProcessor
     sources {
         transitive = false
     }
+}
+
+subprojects {
+    apply plugin: 'java'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -87,6 +92,12 @@ dependencies {
     repackMixin("org.ow2.asm:asm-util:$asmVersion")
     repackMixin("com.google.guava:guava:21.0")
 
+    repackMixinSources("org.spongepowered:mixin:$mixinVersion:sources")
+    repackMixinSources("org.ow2.asm:asm-tree:$asmVersion:sources")
+    repackMixinSources("org.ow2.asm:asm-commons:$asmVersion:sources")
+    repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
+    repackMixinSources("com.google.guava:guava:21.0:sources")
+
     repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     implementation name: "mixin-$mixinVersion-repack"
@@ -110,6 +121,22 @@ task repackMixinJar(type: ShadowJar) {
     destinationDirectory.set(layout.projectDirectory.dir('dependencies'))
     archiveFileName.set("mixin-$mixinVersion-repack.jar")
     configurations = [project.configurations.repackMixin]
+
+    mergeServiceFiles()
+
+    exclude 'META-INF/MANIFEST.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
+    exclude '**/module-info.class'
+
+    relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
+    relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
+}
+
+// Execute for generate mixin sources repack jar
+task repackMixinSourcesJar(type: ShadowJar) {
+    destinationDirectory.set(layout.projectDirectory.dir('dependencies'))
+    archiveFileName.set("mixin-$mixinVersion-sources-repack.jar")
+    configurations = [project.configurations.repackMixinSources]
 
     mergeServiceFiles()
 
@@ -186,7 +213,7 @@ task annotationProcessorJar(type: Jar, dependsOn: classes) {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allJava
-    from(configurations.sources.collect { it.isDirectory() ? it : zipTree(it) }) {
+    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-sources-repack.jar"))) {
         exclude 'LICENSE.txt'
         exclude 'META-INF/services/*.Processor'
         // Replaced by custom classes
@@ -213,12 +240,6 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-
-    classifier = 'dev'
 }
 
 artifacts {
