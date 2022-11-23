@@ -2,6 +2,7 @@
 Library that provides mixin functionality
 * Includes a shadowed Sponge Powered Mixins fork - Currently 0.8.5-GTNH
 * Shades the required libraries that previously made 0.8.5 challenging to use with MC 1.7.10
+* Shades [MixinExtras](https://github.com/LlamaLad7/MixinExtras) - For documentation refer to the official [wiki](https://github.com/LlamaLad7/MixinExtras/wiki)
 * Adds two additional loading strategies for mixins, inspired by [Mixin Booter Legacy](https://github.com/tox1cozZ/mixin-booter-legacy)
   * [IEarlyMixinLoader](src/main/java/com/gtnewhorizon/gtnhmixins/IEarlyMixinLoader.java) - For Mixins targetting Minecraft, Forge, and CoreMods [Note: Currently also requires IFMLLoadingPlugin for FML to force early loading]
   * [ILateMixinLoader](src/main/java/com/gtnewhorizon/gtnhmixins/ILateMixinLoader.java) & [@LateMixin](src/main/java/com/gtnewhorizon/gtnhmixins/LateMixin.java) - For mixins that target other (non core) mods.  Requires both the interface and the Annotation due to limitations in the 1.7.10 ASMDataTable
@@ -29,7 +30,7 @@ Create `mixins.<yourmodid>.late.json`.  Have it reference the base refmap.  The 
 ## License
 
 ### _GTNHMixins_ 
-Lesser GNU Public License 3.0 - see [License](License)
+Lesser GNU Public License 3.0 - see [License](LICENSE)
 
 ### _SpongeMixins_
 
@@ -38,6 +39,10 @@ Inspired by [SpongeMixins](https://github.com/GTNewHorizons/SpongeMixins) by Tim
 ### _Mixin Booter Legacy_
 
 Inspiration and code adapated from https://github.com/tox1cozZ/mixin-booter-legacy under the [LGPL-2.0 License](https://github.com/tox1cozZ/mixin-booter-legacy/blob/master/LICENSE)
+
+### _MixinExtras_
+
+MixinExtras by LlamaLad7 is included in binary files of GTNH Mixins. It is licensed under the [MIT License](https://github.com/LlamaLad7/MixinExtras/blob/master/LICENSE) and can be found at https://github.com/LlamaLad7/MixinExtras
 
 ### Credits
 
