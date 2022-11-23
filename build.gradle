@@ -34,7 +34,7 @@ apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.0.3"
+version = "2.1.0"
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
@@ -57,6 +57,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 ext {
     mixinVersion = '0.8.5-GTNH-1'
+    mixinExtrasVersion = '0.1.1'
     asmVersion = '7.2'
 
     mixinSrg = new File(buildDir, "mixins/mixins.gtnhmixins.srg")
@@ -87,18 +88,21 @@ repositories {
 
 dependencies {
     repackMixin("org.spongepowered:mixin:$mixinVersion")
+    repackMixin("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
     repackMixin("org.ow2.asm:asm-tree:$asmVersion")
     repackMixin("org.ow2.asm:asm-commons:$asmVersion")
     repackMixin("org.ow2.asm:asm-util:$asmVersion")
     repackMixin("com.google.guava:guava:21.0")
 
     repackMixinSources("org.spongepowered:mixin:$mixinVersion:sources")
+    repackMixinSources("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion:sources")
     repackMixinSources("org.ow2.asm:asm-tree:$asmVersion:sources")
     repackMixinSources("org.ow2.asm:asm-commons:$asmVersion:sources")
     repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
     repackMixinSources("com.google.guava:guava:21.0:sources")
 
     repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+    repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
 
     implementation name: "mixin-$mixinVersion-repack"
     annotationProcessor name: "mixin-$mixinVersion-processor-repack"
@@ -128,6 +132,7 @@ task repackMixinJar(type: ShadowJar) {
     exclude '**/module-info.class'
 
     relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.llamalad7.mixinextras', 'com.gtnewhorizon.mixinextras'
     relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
     relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
 }
@@ -144,6 +149,7 @@ task repackMixinSourcesJar(type: ShadowJar) {
     exclude '**/module-info.class'
 
     relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.llamalad7.mixinextras', 'com.gtnewhorizon.mixinextras'
     relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
     relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
 }
@@ -160,6 +166,7 @@ task repackMixinProcessorJar(type: ShadowJar) {
     exclude '**/module-info.class'
 
     relocate 'org.objectweb.asm', 'org.spongepowered.libraries.org.objectweb.asm'
+    relocate 'com.llamalad7.mixinextras', 'com.gtnewhorizon.mixinextras'
     relocate 'com.google.common', 'org.spongepowered.libraries.com.google.common'
     relocate 'com.google.gson', 'org.spongepowered.libraries.com.google.gson'
     relocate 'org.apache.logging.log4j', 'org.spongepowered.libraries.org.apache.logging.log4j'
@@ -201,7 +208,6 @@ jar {
 task annotationProcessorJar(type: Jar, dependsOn: classes) {
     classifier = 'processor'
     from(sourceSets.main.output) {
-//        include 'io/github/tox1cozz/mixinextras/**'
         include 'META-INF/services/javax.annotation.processing.Processor'
     }
     from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-processor-repack.jar"))) {
