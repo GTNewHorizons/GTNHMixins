@@ -34,7 +34,7 @@ apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.1.0"
+version = "2.1.1"
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
@@ -61,8 +61,7 @@ ext {
     asmVersion = '7.2'
 
     mixinSrg = new File(buildDir, "mixins/mixins.gtnhmixins.srg")
-    mixinRefMapName = "mixins.gtnhmixins.refmap.json"
-    mixinRefMap = new File(buildDir, "mixins/" + mixinRefMapName)
+    mixinRefMap = new File(buildDir, "mixins/mixins.gtnhmixins.refmap.json")
 }
 
 minecraft {
@@ -212,7 +211,6 @@ task annotationProcessorJar(type: Jar, dependsOn: classes) {
     }
     from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-processor-repack.jar"))) {
         exclude 'LICENSE.txt'
-        exclude 'META-INF/services/*.Processor'
     }
 }
 
