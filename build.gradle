@@ -34,7 +34,7 @@ apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.1.1"
+version = "2.1.2"
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
@@ -100,8 +100,8 @@ dependencies {
     repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
     repackMixinSources("com.google.guava:guava:21.0:sources")
 
-    repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
     repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
+    repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     implementation name: "mixin-$mixinVersion-repack"
     annotationProcessor name: "mixin-$mixinVersion-processor-repack"
