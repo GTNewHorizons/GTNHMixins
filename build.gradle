@@ -100,8 +100,8 @@ dependencies {
     repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
     repackMixinSources("com.google.guava:guava:21.0:sources")
 
-    repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
     repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
+    repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     implementation name: "mixin-$mixinVersion-repack"
     annotationProcessor name: "mixin-$mixinVersion-processor-repack"
