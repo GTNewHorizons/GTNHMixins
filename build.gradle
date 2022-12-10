@@ -34,7 +34,7 @@ apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.1.2"
+version = "2.1.3"
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
