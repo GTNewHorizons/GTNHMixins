@@ -36,6 +36,7 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
      */
     public static final Map<String, String> MANUALLY_IDENTIFIED_COREMODS = ImmutableMap.<String, String>builder()
         .put("optifine.OptiFineForgeTweaker", "optifine.OptiFineForgeTweaker")
+        .put("codechicken.lib.asm.ModularASMTransformer", "codechicken.lib")
         .put("org.bukkit.World", "Bukkit")
         .build();
 
