@@ -18,7 +18,7 @@
   {
     "modid": "spongemixins",
     "name": "SpongeMixins Loader",
-    "description": "Spongemixins stub",
+    "description": "SpongeMixins stub",
     "version": "1.5.0",
     "mcversion": "${mcversion}",
     "url": "",
@@ -27,6 +27,23 @@
       "Time_Conqueror", "mitchej123"
     ],
     "credits": "SpongePowered Team",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [],
+    "parent": "${modId}"
+  },
+  {
+    "modid": "gasstation",
+    "name": "GasStation",
+    "description": "GasStation stub",
+    "version": "1.0.0",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "FalsePattern"
+    ],
+    "credits": "",
     "logoFile": "",
     "screenshots": [],
     "dependencies": [],
