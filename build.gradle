@@ -28,13 +28,14 @@ plugins {
     id 'eclipse'
     id 'maven-publish'
     id 'org.ajoberstar.grgit' version '4.1.1'
+    id 'com.palantir.git-version' version '0.13.0' // 0.13.0 is the last jvm8 supporting version
     id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 apply plugin: 'forge'
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-version = "2.1.4"
+version = System.getenv("RELEASE_VERSION") ?: gitVersion()
 group = "com.gtnewhorizon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "gtnhmixins"
 
@@ -173,7 +174,7 @@ task repackMixinProcessorJar(type: ShadowJar) {
 }
 
 compileJava {
-    dependsOn copySrgs
+    dependsOn copySrgs, repackMixinJar, repackMixinSourcesJar, repackMixinProcessorJar
     options.compilerArgs += [
             '-Xlint:-processing',
             "-AoutSrgFile=${mixinSrg.canonicalPath}",
