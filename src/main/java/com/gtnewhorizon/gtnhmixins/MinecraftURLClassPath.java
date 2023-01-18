@@ -2,12 +2,9 @@ package com.gtnewhorizon.gtnhmixins;
 
 import com.google.common.io.Files;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import sun.misc.URLClassPath;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 
@@ -16,18 +13,6 @@ public final class MinecraftURLClassPath {
      *  Utility to manipulate the minecraft URL ClassPath 
      */
     private static final Path MOD_DIRECTORY_PATH = new File(Launch.minecraftHome, "mods/").toPath();
-    private static final URLClassPath ucp;
-
-    static {
-        try {
-            Field ucpField = LaunchClassLoader.class.getSuperclass().getDeclaredField("ucp");
-            
-            ucpField.setAccessible(true);
-            ucp = (URLClassPath)ucpField.get(Launch.classLoader);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 
     /**
      * Get a jar within the minecraft mods directory
@@ -57,7 +42,7 @@ public final class MinecraftURLClassPath {
      */
     @SuppressWarnings("All")
     public static boolean findJarInClassPath(final String jarname) {
-        for(URL url : ucp.getURLs()) {
+        for(URL url : Launch.classLoader.getURLs()) {
             final String filename = url.getFile();
             final String extension = Files.getFileExtension(filename);
             
@@ -73,7 +58,7 @@ public final class MinecraftURLClassPath {
      *  - Needed when using mixins on classes outside of Minecraft or other coremods 
      */
     public static void addJar(File pathToJar) throws Exception {
-        ucp.addURL(pathToJar.toURI().toURL());
+        Launch.classLoader.addURL(pathToJar.toURI().toURL());
     }
 
     private MinecraftURLClassPath() {
