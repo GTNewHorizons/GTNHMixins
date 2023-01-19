@@ -58,9 +58,9 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 ext {
-    mixinVersion = '0.8.5-GTNH-1'
+    mixinVersion = '0.8.5-GTNH-2'
     mixinExtrasVersion = '0.1.1'
-    asmVersion = '7.2'
+    asmVersion = '9.4'
 
     mixinSrg = new File(buildDir, "mixins/mixins.gtnhmixins.srg")
     mixinRefMap = new File(buildDir, "mixins/mixins.gtnhmixins.refmap.json")
