@@ -10,9 +10,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.transformer.Config;
-import sun.misc.URLClassPath;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -52,22 +53,40 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
         // Borrowed from VanillaFix -- Move jar up in the classloader's URLs to make sure that the latest version of Mixin is used
         URL url = GTNHMixinsCore.class.getProtectionDomain().getCodeSource().getLocation();
         givePriorityInClasspath(url, Launch.classLoader);
-        givePriorityInClasspath(url, (URLClassLoader) ClassLoader.getSystemClassLoader());
+        givePriorityInClasspath(url, ClassLoader.getSystemClassLoader());
     }
 
-    private static void givePriorityInClasspath(URL url, URLClassLoader classLoader) {
+    private static void givePriorityInClasspath(URL url, ClassLoader classLoader) {
         try {
-            Field ucpField = URLClassLoader.class.getDeclaredField("ucp");
+            // Java 9+ System App class loader type has a ucp field, but does not extend URLClassLoader
+            final Field urlUcpField = URLClassLoader.class.getDeclaredField("ucp");
+            urlUcpField.setAccessible(true);
+            final Field ucpField = (classLoader instanceof URLClassLoader) ? urlUcpField : classLoader.getClass().getDeclaredField("ucp");
             ucpField.setAccessible(true);
+            final Method rawUrlsGetter = ucpField.getType().getDeclaredMethod("getURLs");
+            rawUrlsGetter.setAccessible(true);
 
-            List<URL> urls = new ArrayList<>(Arrays.asList(classLoader.getURLs()));
+            final URL[] originalUrls;
+            if (classLoader instanceof URLClassLoader) {
+                originalUrls = ((URLClassLoader) classLoader).getURLs();
+            } else {
+                final Object oldUcp = ucpField.get(classLoader);
+                originalUrls = (URL[]) rawUrlsGetter.invoke(oldUcp);
+            }
+            final List<URL> urls = new ArrayList<>(Arrays.asList(originalUrls));
             urls.remove(url);
             urls.add(0, url);
-            URLClassPath ucp = new URLClassPath(urls.toArray(new URL[0]));
 
-            ucpField.set(classLoader, ucp);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
+            final URLClassLoader dummyLoader = new URLClassLoader(urls.toArray(new URL[0]), classLoader);
+            final Object newUcp = urlUcpField.get(dummyLoader);
+            ucpField.set(classLoader, newUcp);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+            if (!(classLoader instanceof URLClassLoader)) {
+                // Don't crash if JVM internals change again
+                LOGGER.warn("System class loader is of unsupported type {} and could not be handled", classLoader.getClass().getName(), e);
+            } else {
+                throw new AssertionError(e);
+            }
         }
     }
 
