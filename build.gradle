@@ -129,9 +129,6 @@ dependencies {
 
     repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
     repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
-
-    implementation name: "mixin-$mixinVersion-repack"
-    annotationProcessor name: "mixin-$mixinVersion-processor-repack"
 }
 
 tasks.named("reobfJar", ReobfuscatedJar).configure {
@@ -197,8 +194,13 @@ task repackMixinProcessorJar(type: ShadowJar) {
     relocate 'com.google.thirdparty.publicsuffix', 'org.spongepowered.libraries.com.google.thirdparty.publicsuffix'
 }
 
+dependencies {
+    implementation(files(tasks.named("repackMixinJar", Jar)))
+    annotationProcessor(files(tasks.named("repackMixinProcessorJar", Jar)))
+}
+
 compileJava {
-    dependsOn copySrgs, repackMixinJar, repackMixinSourcesJar, repackMixinProcessorJar
+    dependsOn copySrgs
     options.compilerArgs += [
             '-Xlint:-processing',
             "-AoutSrgFile=${mixinSrg.canonicalPath}",
@@ -221,7 +223,7 @@ jar {
         ])
     }
 
-    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-repack.jar"))) {
+    from(zipTree(tasks.named("repackMixinJar", Jar).flatMap {it.archiveFile})) {
         exclude "META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.MF"
         exclude "META-INF/services/*.Processor"
         // Replaced by local classes
@@ -230,26 +232,25 @@ jar {
 }
 
 task annotationProcessorJar(type: Jar, dependsOn: classes) {
-    classifier = 'processor'
+    archiveClassifier.set('processor')
     from(sourceSets.main.output) {
         include 'META-INF/services/javax.annotation.processing.Processor'
     }
-    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-processor-repack.jar"))) {
+    from(zipTree(tasks.named("repackMixinProcessorJar", Jar).flatMap {it.archiveFile})) {
         exclude 'LICENSE.txt'
     }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from sourceSets.main.allJava
-    from(zipTree(layout.projectDirectory.file("dependencies/mixin-$mixinVersion-sources-repack.jar"))) {
+    from(zipTree(tasks.named("repackMixinSourcesJar", Jar).flatMap {it.archiveFile})) {
         exclude 'LICENSE.txt'
         exclude 'META-INF/services/*.Processor'
         // Replaced by custom classes
         exclude 'org/spongepowered/asm/bridge/**'
     }
 }
-
 
 processResources {
     // this will ensure that this task is redone when the versions change.
