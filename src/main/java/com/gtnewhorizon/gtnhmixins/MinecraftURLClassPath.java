@@ -2,6 +2,7 @@ package com.gtnewhorizon.gtnhmixins;
 
 import com.google.common.io.Files;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +59,10 @@ public final class MinecraftURLClassPath {
      *  - Needed when using mixins on classes outside of Minecraft or other coremods 
      */
     public static void addJar(File pathToJar) throws Exception {
-        Launch.classLoader.addURL(pathToJar.toURI().toURL());
+        final LaunchClassLoader loader = Launch.classLoader;
+        loader.addURL(pathToJar.toURI().toURL());
+        // Act as-if we only added the mod to ucp
+        loader.getSources().remove(loader.getSources().size() - 1);
     }
 
     private MinecraftURLClassPath() {
