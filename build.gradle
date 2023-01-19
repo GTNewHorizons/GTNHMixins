@@ -1,24 +1,25 @@
+
+import com.gtnewhorizons.retrofuturagradle.mcp.ReobfuscatedJar
+
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        gradlePluginPortal()
+//        gradlePluginPortal()
         maven {
             name 'forge'
             url 'https://maven.minecraftforge.net'
         }
         maven {
-            // GTNH ForgeGradle Fork
-            name = "GTNH Maven"
-            url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+            // GTNH RetroFuturaGradle and ASM Fork
+            name "GTNH Maven"
+            url "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+            allowInsecureProtocol = true
         }
         maven {
             name 'sonatype'
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2.11'
     }
 }
 
@@ -27,13 +28,27 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'maven-publish'
-    id 'org.ajoberstar.grgit' version '4.1.1'
-    id 'com.palantir.git-version' version '0.13.0' // 0.13.0 is the last jvm8 supporting version
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
+    id 'org.ajoberstar.grgit' version '4.1.1' // 4.1.1 is the last jvm8 supporting version ,unused, available for addon.gradle
+    id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
+    id 'com.palantir.git-version' version '0.13.0' apply false // 0.13.0 is the last jvm8 supporting version
+    id 'de.undercouch.download' version '5.3.0'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.0.11'
 }
-apply plugin: 'forge'
+
+if (project.file('.git/HEAD').isFile()) {
+    apply plugin: 'com.palantir.git-version'
+}
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+apply plugin: "com.github.johnrengelman.shadow"
+
+def projectJavaVersion = JavaLanguageVersion.of(8)
+java {
+    toolchain {
+        languageVersion.set(projectJavaVersion)
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
+}
 
 version = System.getenv("RELEASE_VERSION") ?: gitVersion()
 
@@ -45,6 +60,11 @@ configurations {
     repackMixinSources
     repackMixinProcessor
     annotationProcessor
+    create("runtimeOnlyNonPublishable") {
+        description = "Runtime only dependencies that are not published alongside the jar"
+        canBeConsumed = false
+        canBeResolved = false
+    }
     sources {
         transitive = false
     }
@@ -53,9 +73,6 @@ configurations {
 subprojects {
     apply plugin: 'java'
 }
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 
 ext {
     mixinVersion = '0.8.5-GTNH-2'
@@ -68,9 +85,8 @@ ext {
 
 minecraft {
     version = "1.7.10-10.13.4.1614-1.7.10"
-    runDir = "run"
-    replaceIn("GTNHMixins.java")
-    replace("GRADLETOKEN_VERSION", project.version)
+    tagReplacementFiles.add("GTNHMixins.java")
+    injectedTags.put("GRADLETOKEN_VERSION", project.version)
 }
 
 repositories {
@@ -79,10 +95,16 @@ repositories {
         // GTNH ForgeGradle Fork
         name = "GTNH Maven"
         url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+        allowInsecureProtocol = true
     }
     maven {
         name 'Overmind forge repo mirror'
         url 'https://gregtech.overminddl1.com/'
+    }
+    maven {
+        // Fernflower
+        name = "Fabric Maven"
+        url = "https://maven.fabricmc.net/"
     }
     flatDir {
         dirs 'dependencies'
@@ -103,6 +125,7 @@ dependencies {
     repackMixinSources("org.ow2.asm:asm-commons:$asmVersion:sources")
     repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
     repackMixinSources("com.google.guava:guava:21.0:sources")
+    runtimeOnlyNonPublishable('org.jetbrains:intellij-fernflower:1.2.1.16')
 
     repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
     repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
@@ -111,14 +134,12 @@ dependencies {
     annotationProcessor name: "mixin-$mixinVersion-processor-repack"
 }
 
-reobf {
-    if (mixinSrg.exists()) {
-        addExtraSrgFile mixinSrg
-    }
+tasks.named("reobfJar", ReobfuscatedJar).configure {
+    extraSrgFiles.from(mixinSrg)
 }
 
-task copySrgs(type: Copy, dependsOn: 'genSrgs') {
-    from plugins.getPlugin("forge").delayedFile('{SRG_DIR}')
+task copySrgs(type: Copy, dependsOn: tasks.generateForgeSrgMappings) {
+    from project.mcpTasks.forgeSrgLocation
     include '**/*.srg'
     into 'build/srgs'
 }
@@ -232,16 +253,15 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 processResources {
     // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "modVersion", project.version
+    inputs.property "minecraftVersion", project.minecraft.mcVersion
     inputs.property "modId", project.modId
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version, 'modId': project.modId
+    // replace stuff in mcmod.info, nothing else. replaces ${key} with value in text
+    filesMatching("mcmod.info")  {
+        expand "minecraftVersion": project.minecraft.mcVersion,
+                "modVersion": project.version,
+                "modId": project.modId
     }
 
     // copy everything else, thats not the mcmod.info
