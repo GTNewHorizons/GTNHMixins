@@ -3,8 +3,8 @@
     "modid": "${modId}",
     "name": "GTNHMixins",
     "description": "GTNH flavored mixins",
-    "version": "${version}",
-    "mcversion": "${mcversion}",
+    "version": "${modVersion}",
+    "mcversion": "${minecraftVersion}",
     "url": "https://github.com/GTNewHorizons/gtnhmixins",
     "updateUrl": "",
     "authorList": [
@@ -20,7 +20,7 @@
     "name": "SpongeMixins Loader",
     "description": "SpongeMixins stub",
     "version": "1.5.0",
-    "mcversion": "${mcversion}",
+    "mcversion": "${minecraftVersion}",
     "url": "",
     "updateUrl": "",
     "authorList": [
@@ -37,7 +37,7 @@
     "name": "GasStation",
     "description": "GasStation stub",
     "version": "1.0.0",
-    "mcversion": "${mcversion}",
+    "mcversion": "${minecraftVersion}",
     "url": "",
     "updateUrl": "",
     "authorList": [
