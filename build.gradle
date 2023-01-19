@@ -48,6 +48,7 @@ java {
         languageVersion.set(projectJavaVersion)
         vendor.set(JvmVendorSpec.ADOPTIUM)
     }
+    withSourcesJar()
 }
 
 version = System.getenv("RELEASE_VERSION") ?: gitVersion()
@@ -84,7 +85,6 @@ ext {
 }
 
 minecraft {
-    version = "1.7.10-10.13.4.1614-1.7.10"
     tagReplacementFiles.add("GTNHMixins.java")
     injectedTags.put("GRADLETOKEN_VERSION", project.version)
 }
@@ -241,9 +241,7 @@ task annotationProcessorJar(type: Jar, dependsOn: classes) {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier.set('sources')
-    from sourceSets.main.allJava
+tasks.named("sourcesJar", Jar).configure {
     from(zipTree(tasks.named("repackMixinSourcesJar", Jar).flatMap {it.archiveFile})) {
         exclude 'LICENSE.txt'
         exclude 'META-INF/services/*.Processor'
@@ -272,6 +270,14 @@ artifacts {
     archives sourcesJar
 }
 
+tasks.named("shadowJar", ShadowJar).configure {
+    enabled = false
+}
+
+AdhocComponentWithVariants javaComponent = (AdhocComponentWithVariants) project.components.findByName("java")
+javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements) {
+    skip()
+}
 
 publishing {
     publications {
@@ -280,14 +286,10 @@ publishing {
             version = project.version
             artifactId = project.archivesBaseName
 
-            artifact(jar) {
-                builtBy jar
-            }
+            from components.java
+
             artifact(annotationProcessorJar) {
                 builtBy annotationProcessorJar
-            }
-            artifact(sourcesJar) {
-                builtBy sourcesJar
             }
         }
     }
