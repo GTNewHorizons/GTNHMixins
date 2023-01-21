@@ -61,7 +61,18 @@ public class GTNHMixinsCore implements IFMLLoadingPlugin {
             // Java 9+ System App class loader type has a ucp field, but does not extend URLClassLoader
             final Field urlUcpField = URLClassLoader.class.getDeclaredField("ucp");
             urlUcpField.setAccessible(true);
-            final Field ucpField = (classLoader instanceof URLClassLoader) ? urlUcpField : classLoader.getClass().getDeclaredField("ucp");
+            Field ucpField = null;
+            if (classLoader instanceof URLClassLoader) {
+                ucpField = urlUcpField;
+            } else {
+                try {
+                    // Java 8-11
+                    ucpField = classLoader.getClass().getDeclaredField("ucp");
+                } catch (NoSuchFieldException e) {
+                    // Java 17
+                    ucpField = classLoader.getClass().getSuperclass().getDeclaredField("ucp");
+                }
+            }
             ucpField.setAccessible(true);
             final Method rawUrlsGetter = ucpField.getType().getDeclaredMethod("getURLs");
             rawUrlsGetter.setAccessible(true);
