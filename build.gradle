@@ -252,16 +252,15 @@ tasks.named("sourcesJar", Jar).configure {
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "modVersion", project.version
-    inputs.property "minecraftVersion", project.minecraft.mcVersion
+    inputs.property "minecraftVersion", minecraft.mcVersion
     inputs.property "modId", project.modId
 
     // replace stuff in mcmod.info, nothing else. replaces ${key} with value in text
     filesMatching("mcmod.info")  {
-        expand "minecraftVersion": project.minecraft.mcVersion,
+        expand "minecraftVersion": minecraft.mcVersion.get(),
                 "modVersion": project.version,
                 "modId": project.modId
     }
-    exclude 'mcmod.info'
 }
 
 artifacts {
