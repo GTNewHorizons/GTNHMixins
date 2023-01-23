@@ -5,7 +5,6 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-//        gradlePluginPortal()
         maven {
             name 'forge'
             url 'https://maven.minecraftforge.net'
@@ -32,7 +31,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
     id 'com.palantir.git-version' version '0.13.0' apply false // 0.13.0 is the last jvm8 supporting version
     id 'de.undercouch.download' version '5.3.0'
-    id 'com.gtnewhorizons.retrofuturagradle' version '1.0.11'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.0.13'
 }
 
 if (project.file('.git/HEAD').isFile()) {
