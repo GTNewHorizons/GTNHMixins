@@ -31,7 +31,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
     id 'com.palantir.git-version' version '0.13.0' apply false // 0.13.0 is the last jvm8 supporting version
     id 'de.undercouch.download' version '5.3.0'
-    id 'com.gtnewhorizons.retrofuturagradle' version '1.1.4'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.1.6'
 }
 
 if (project.file('.git/HEAD').isFile()) {
@@ -222,7 +222,10 @@ jar {
                 "Premain-Class"              : "org.spongepowered.tools.agent.MixinAgent",
                 "Agent-Class"                : "org.spongepowered.tools.agent.MixinAgent",
                 "Can-Redefine-Classes"       : true,
-                "Can-Retransform-Classes"    : true
+                "Can-Retransform-Classes"    : true,
+                "Implementation-Title"       : "${modId}",
+                "Implementation-Version"     : "${mixinVersion}",
+                "Implementation-Vendor"      : "GT New Horizons",
         ])
     }
 
