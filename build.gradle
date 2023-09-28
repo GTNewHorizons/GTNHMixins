@@ -76,7 +76,7 @@ subprojects {
 
 ext {
     mixinVersion = '0.8.5-GTNH-2'
-    mixinExtrasVersion = '0.1.1'
+    mixinExtrasVersion = '0.2.0-rc.5'
     asmVersion = '9.4'
 
     mixinSrg = new File(buildDir, "mixins/mixins.gtnhmixins.srg")
@@ -90,6 +90,7 @@ minecraft {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
         // GTNH ForgeGradle Fork
         name = "GTNH Maven"
@@ -112,21 +113,21 @@ repositories {
 
 dependencies {
     repackMixin("org.spongepowered:mixin:$mixinVersion")
-    repackMixin("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
+    repackMixin("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
     repackMixin("org.ow2.asm:asm-tree:$asmVersion")
     repackMixin("org.ow2.asm:asm-commons:$asmVersion")
     repackMixin("org.ow2.asm:asm-util:$asmVersion")
     repackMixin("com.google.guava:guava:21.0")
 
     repackMixinSources("org.spongepowered:mixin:$mixinVersion:sources")
-    repackMixinSources("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion:sources")
+    repackMixinSources("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion:sources")
     repackMixinSources("org.ow2.asm:asm-tree:$asmVersion:sources")
     repackMixinSources("org.ow2.asm:asm-commons:$asmVersion:sources")
     repackMixinSources("org.ow2.asm:asm-util:$asmVersion:sources")
     repackMixinSources("com.google.guava:guava:21.0:sources")
     runtimeOnlyNonPublishable('org.jetbrains:intellij-fernflower:1.2.1.16')
 
-    repackMixinProcessor("com.github.LlamaLad7:MixinExtras:$mixinExtrasVersion")
+    repackMixinProcessor("io.github.llamalad7:mixinextras-common:$mixinExtrasVersion")
     repackMixinProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 }
 
